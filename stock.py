@@ -38,6 +38,7 @@ train_Y = []
 test_X = []
 n_future = 1   #number of days to predict into the future
 n_past = 14   #number of past days to use to predict the future (try different time range in the next steps, for now using 2 weeks of data)
+#n_past = 60   # we try two versions, one is 14 and one is 60
 
 for i in range(n_past, len(df_train_scaled) - n_future + 1):
     train_X.append(df_train_scaled[i - n_past:i, 0:df_train_scaled.shape[1]])
@@ -55,7 +56,7 @@ print('train_Y shape == {}.'.format(train_Y.shape))
 print('test_X shape == {}.'.format(test_X.shape))
 
 
-#Define the model
+#Define the model (20% of dropout rate and loss function is mse. Up to experiment)
 model = Sequential()
 model.add(LSTM(64, activation = 'relu', input_shape = (train_X.shape[1], train_X.shape[2]), return_sequences=True))
 model.add(LSTM(32, activation = 'relu', return_sequences=False))
@@ -77,7 +78,7 @@ forecast_repeat = np.repeat(forecast, df_data.shape[1], axis = -1)
 y_pred_future = scaler.inverse_transform(forecast_repeat)[:,0].T
 print(y_pred_future.shape)
 
-# graph to compare with the real data
+# graph to compare with the real data, using n_forcast*3 past days, and predict on n_forcast days
 y_valid = df_data['Open'].to_numpy()
 y_valid = y_valid[-n_forcast*3:]
 print(y_valid.shape)
